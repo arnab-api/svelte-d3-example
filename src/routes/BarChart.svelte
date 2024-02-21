@@ -10,8 +10,11 @@
 	export let color;
 
 	const margin = {top: 25, right: 20, bottom: 50, left: 60};
-	const width = 400;
-	const height = 400;
+	let borderBoxSize;
+
+	$: width = borderBoxSize ? Math.min(borderBoxSize[0].blockSize, borderBoxSize[0].inlineSize) : 400
+	$: height = borderBoxSize ? Math.min(borderBoxSize[0].blockSize, borderBoxSize[0].inlineSize) : 400
+
 
 	$: counts = d3.rollup(
 		dataset,
@@ -33,21 +36,28 @@
 		.padding(0.1);
 </script>
 
+<div class="barchart" bind:borderBoxSize>
+	<svg {width} {height}>
+		<g>
+			{#each counts as [category, count]}
+				<rect
+					x = {x(0)}
+					y = {y(category)}
+					height = {y.bandwidth()}
+					width = {x(count) - x(0)}
+					fill = {color(category)}
+				/>
+			{/each}
+		</g>
 
-<svg {width} {height}>
-	<g>
-		{#each counts as [category, count]}
-			<rect
-				x = {x(0)}
-				y = {y(category)}
-				height = {y.bandwidth()}
-				width = {x(count) - x(0)}
-				fill = {color(category)}
-			/>
-		{/each}
-	</g>
+		<Axis scale={x} {width} {height} {margin} orientation="bottom" label={'Count'}/>
+		<Axis scale={y} {width} {height} {margin} orientation="left"/>
+	</svg>
+</div>
 
-	<Axis scale={x} {width} {height} {margin} orientation="bottom"/>
-	<Axis scale={y} {width} {height} {margin} orientation="left"/>
-</svg>
-
+<style>
+	.barchart {
+		flex: 1;
+		height: 100%;
+	}
+</style>

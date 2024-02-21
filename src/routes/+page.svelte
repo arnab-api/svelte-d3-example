@@ -4,6 +4,8 @@
 	import ScatterPlot from './ScatterPlot.svelte';
 	import BarChart from './BarChart.svelte';
 	import * as d3 from 'd3'
+	import ColorLegend from './ColorLegend.svelte';
+	import FeatureControls from './FeatureControls.svelte';
 
 	// data comes from the load function in +page.js
 	export let data;
@@ -12,6 +14,12 @@
 	let xFeature = 'strikeout';
 	let yFeature = 'hit';
 	let colorFeature = 'all_star';
+
+	let highlightedPlayer = null;
+
+	function onhover(player) {
+		highlightedPlayer = player;
+	}
 
 	$: catagories = d3.groupSort(
 		data.dataset,
@@ -23,10 +31,13 @@
 </script>
 
 <div class="container">
-	<div class="header"> </div>
+	<div class="header">
+		<FeatureControls dataset={data.dataset} bind:xFeature bind:yFeature bind:colorFeature/>
+		<ColorLegend {color}/>
+	</div>
 	<div class="main">
-		<PlayerList dataset = {data.dataset} />
-		<ScatterPlot dataset = {data.dataset} {xFeature} {yFeature} {colorFeature} {color}/>
+		<PlayerList dataset = {data.dataset} {onhover}/>
+		<ScatterPlot dataset = {data.dataset} {xFeature} {yFeature} {colorFeature} {color} {highlightedPlayer}/>
 		<BarChart dataset = {data.dataset} feature={colorFeature} {color} />
 	</div>
 </div>
@@ -52,6 +63,12 @@
 		min-height: 0;  /*allowing main to shrink*/
 		/* place children next to each other */
 		display: flex;
+		gap: 2em;
+	}
+
+	.header {
+		display: flex;
+		align-items: center;
 		gap: 2em;
 	}
 </style>
